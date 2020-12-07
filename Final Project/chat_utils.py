@@ -9,18 +9,23 @@ CHAT_IP = '127.0.0.1'
 CHAT_PORT = 1112
 SERVER = (CHAT_IP, CHAT_PORT)
 
+GAME_PORT = 1234
+SERVER = (CHAT_IP, GAME_PORT)
+
 menu = "\n++++ Choose one of the following commands\n \
         time: calendar time in the system\n \
         who: to find out who else are there\n \
         c _peer_: to connect to the _peer_ and chat\n \
         ? _term_: to search your chat logs where _term_ appears\n \
         p _#_: to get number <#> sonnet\n \
-        q: to leave the chat system\n\n"
+        q: to leave the chat system\n \
+        g: to play Tic-Tac-Toe with your peer\n\n"
 
 S_OFFLINE   = 0
 S_CONNECTED = 1
 S_LOGGEDIN  = 2
 S_CHATTING  = 3
+S_PLAYING   = 4
 
 SIZE_SPEC = 5
 
@@ -36,6 +41,8 @@ def print_state(state):
         print('Logged in')
     elif state == S_CHATTING:
         print('Chatting')
+    elif state == S_PLAYING:
+        print("Playing")
     else:
         print('Error: wrong state')
 

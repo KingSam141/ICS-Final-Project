@@ -225,6 +225,30 @@ class Server:
                     {"action": "search", "results": search_rslt}))
 
 # ==============================================================================
+#                 Tic-Tac-Toe Game
+# ==============================================================================
+
+            elif msg["action"] == "play":
+                first_row = [" ", "|", " ", "|", " "]
+                second_row = ["-", "-", "-", "-", "-"]
+                third_row = [" ", "|", " ", "|", " "]
+                fourth_row = ["-", "-", "-", "-", "-"]
+                fifth_row = [" ", "|", " ", "|", " "]
+                game_board = [first_row, "\n", second_row, "\n", third_row, "\n", fourth_row, "\n", fifth_row, "\n"]
+                game_string = ""
+
+                for i in game_board:
+                    for x in i:
+                        game_string += x
+
+                print(game_string)
+
+                print("Enter your move: Upper Left, Upper Center, Upper Right")
+                print("Middle Left, Middle Center, Middle Right")
+                print("Lower Left, Lower Center, Lower Right")
+
+                    
+# ==============================================================================
 #                 the "from" guy really, really has had enough
 # ==============================================================================
 
