@@ -129,7 +129,12 @@ class ClientSM:
                         self.out_msg += 'Connected to ' + peer + '!\n\n'
                         self.out_msg += "Let's play tic-tac-toe.\n"
                         self.out_msg += '-----------------------------------\n'
+                        self.out_msg += "Commands:\n"
                         self.out_msg += "Press b to see the board.\n"
+                        self.out_msg += "Each number represents a move on the board:\n" + "1. Upper Left\n" + "2. Upper Center\n" + "3. Upper Right\n" \
+                               + "4. Middle Left\n" + "5. Middle Center\n" +  "6. Middle Right\n" + "7. Lower Left\n" \
+                               + "8. Lower Center\n" + "9. Lower Right\n"
+                        self.out_msg += "Enter a number when it's your turn to make a move. The board will appear after you make a move.\n"
                         self.out_msg += "------------------------------------\n"
                         self.state = S_PLAYING
                     else:
@@ -161,7 +166,12 @@ class ClientSM:
                     self.out_msg += "You are connected with " + self.peer + "\n"
                     self.out_msg += "Let's play tic-tac-toe.\n"
                     self.out_msg += "------------------------------------\n"
+                    self.out_msg += "Commands:\n"
                     self.out_msg += "Press b to see the board.\n"
+                    self.out_msg += "Each number represents a move on the board:\n" + "1. Upper Left\n" + "2. Upper Center\n" + "3. Upper Right\n" \
+                               + "4. Middle Left\n" + "5. Middle Center\n" +  "6. Middle Right\n" + "7. Lower Left\n" \
+                               + "8. Lower Center\n" + "9. Lower Right\n"
+                    self.out_msg += "Enter a number when it's your turn to make a move. The board will appear after you make a move.\n"
                     self.out_msg += "------------------------------------\n"
                     self.state = S_PLAYING
                     
@@ -198,10 +208,42 @@ class ClientSM:
         elif self.state == S_PLAYING:
             if len(my_msg) > 0:
                 if my_msg == "b":
+                    mysend(self.s, json.dumps({"action":"exchange", "from":"[" + self.me + "]", "message":my_msg}))
                     mysend(self.s, json.dumps({"action":"screen_update"}))
                     response = json.loads(myrecv(self.s))
-                    self.out_msg += response["message"]
+                    self.out_msg += "\n"
                     self.out_msg += response["game_board"]
+                    self.out_msg += "\n"
+                elif my_msg == "1" or my_msg == "2" or my_msg == "3" or my_msg == "4" or my_msg == "5" or my_msg == "6" or my_msg == "7" or my_msg == "8" or my_msg == "9":
+                    mysend(self.s, json.dumps({"action":"exchange", "from":"[" + self.me + "]", "message":my_msg}))
+                    mysend(self.s, json.dumps({"action":"move", "selected_move":my_msg}))
+                    response = json.loads(myrecv(self.s))
+                    self.out_msg += response["message"]
+                    self.out_msg += "\n"
+                    mysend(self.s, json.dumps({"action":"screen_update"}))
+                    response = json.loads(myrecv(self.s))
+                    self.out_msg += "\n"
+                    self.out_msg += response["game_board"]
+                    self.out_msg += "\n"
+                elif my_msg == 'bye':
+                    self.disconnect()
+                    self.state = S_LOGGEDIN
+                    self.peer = ''
+            if len(peer_msg) > 0:
+                peer_msg = json.loads(peer_msg)
+                if peer_msg["action"] == "disconnect":
+                    self.state = S_LOGGEDIN
+                else:
+                    self.out_msg += peer_msg["from"] + peer_msg["message"]
+                    mysend(self.s, json.dumps({"action":"screen_update"}))
+                    response = json.loads(myrecv(self.s))
+                    self.out_msg += "\n"
+                    self.out_msg += response["game_board"]
+                    self.out_msg += "\n"
+
+            # Display the menu again
+            if self.state == S_LOGGEDIN:
+                self.out_msg += menu
             
 #==============================================================================
 # invalid state
