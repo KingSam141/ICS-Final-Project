@@ -47,7 +47,7 @@ class ClientSM:
         return(False)
 
     def play_with(self, peer):
-        msg = json.dumps({"action":"play", "target":peer})
+        msg = json.dumps({"action":"game", "target":peer})
         mysend(self.s, msg)
         response = json.loads(myrecv(self.s))
         if response["status"] == "success":
@@ -126,10 +126,12 @@ class ClientSM:
                     peer = my_msg[1:]
                     peer = peer.strip()
                     if self.play_with(peer) == True:
-                        self.state = S_PLAYING
                         self.out_msg += 'Connected to ' + peer + '!\n\n'
                         self.out_msg += "Let's play tic-tac-toe.\n"
                         self.out_msg += '-----------------------------------\n'
+                        self.out_msg += "Press b to see the board.\n"
+                        self.out_msg += "------------------------------------\n"
+                        self.state = S_PLAYING
                     else:
                         self.out_msg += 'Connection unsuccessful\n'
 
@@ -142,9 +144,8 @@ class ClientSM:
                 except Exception as err :
                     self.out_msg += " json.loads failed " + str(err)
                     return self.out_msg
-            
+         
                 if peer_msg["action"] == "connect":
-
                     # ----------your code here------#
                     self.peer = peer_msg["from"]
                     self.out_msg += "Request from " + self.peer + "\n"
@@ -154,11 +155,13 @@ class ClientSM:
                     self.state = S_CHATTING
                     # ----------end of your code----#
 
-                if peer_msg["action"] == "play":
+                elif peer_msg["action"] == "game":
                     self.peer = peer_msg["from"]
                     self.out_msg += "Request from " + self.peer + "\n"
-                    self.out_msg += "You are connected with " + self.peer
+                    self.out_msg += "You are connected with " + self.peer + "\n"
                     self.out_msg += "Let's play tic-tac-toe.\n"
+                    self.out_msg += "------------------------------------\n"
+                    self.out_msg += "Press b to see the board.\n"
                     self.out_msg += "------------------------------------\n"
                     self.state = S_PLAYING
                     
@@ -188,22 +191,17 @@ class ClientSM:
             # Display the menu again
             if self.state == S_LOGGEDIN:
                 self.out_msg += menu
+#==============================================================================
+# handles state S_PLAYING
+#==============================================================================
 
         elif self.state == S_PLAYING:
             if len(my_msg) > 0:
-                mysend(self.s, json.dumps({"action":"exchange", "from":"[" + self.me + "]", "move":my_msg}))
-                if my_msg == 'bye':
-                    self.disconnect()
-                    self.state = S_LOGGEDIN
-                    self.peer = ''
-            if len(peer_msg) > 0:
-                peer_msg = json.loads(peer_msg)
-                if peer_msg["action"] == "play":
-                    self.out_msg += peer_msg["from"] + " has joined."
-                elif peer_msg["action"] == "disconnect":
-                    self.state = S_LOGGEDIN
-                else:
-                    self.out_msg += peer_msg["from"] + peer_msg["message"]
+                if my_msg == "b":
+                    mysend(self.s, json.dumps({"action":"screen_update"}))
+                    response = json.loads(myrecv(self.s))
+                    self.out_msg += response["message"]
+                    self.out_msg += response["game_board"]
             
 #==============================================================================
 # invalid state

@@ -102,7 +102,27 @@ class Server:
             # handle connect request this is implemented for you
             # ==============================================================================
             msg = json.loads(msg)
-            if msg["action"] == "connect":
+            if msg["action"] == "game":
+                to_name = msg["target"]
+                from_name = self.logged_sock2name[from_sock]
+                if to_name == from_name:
+                    msg = json.dumps({"action": "game", "status": "self"})
+                # connect to the peer
+                elif self.group.is_member(to_name):
+                    to_sock = self.logged_name2sock[to_name]
+                    self.group.connect(from_name, to_name)
+                    the_guys = self.group.list_me(from_name)
+                    msg = json.dumps(
+                        {"action": "game", "status": "success"})
+                    for g in the_guys[1:]:
+                        to_sock = self.logged_name2sock[g]
+                        mysend(to_sock, json.dumps(
+                            {"action": "game", "status": "request", "from": from_name}))
+                else:
+                    msg = json.dumps(
+                        {"action": "game", "status": "no-user"})
+                mysend(from_sock, msg)
+            elif msg["action"] == "connect":
                 to_name = msg["target"]
                 from_name = self.logged_sock2name[from_sock]
                 if to_name == from_name:
@@ -228,7 +248,16 @@ class Server:
 #                 Tic-Tac-Toe Game
 # ==============================================================================
 
-            elif msg["action"] == "play":
+            elif msg["action"] == "game":
+                players = []
+                names = self.logged_name2sock
+                for name in names:
+                    players += [name]
+                print(players)
+                
+                mysend(from_sock, json.dumps({"action": "game", "time_to_start": "y"}))
+
+            elif msg["action"] == "screen_update":
                 first_row = [" ", "|", " ", "|", " "]
                 second_row = ["-", "-", "-", "-", "-"]
                 third_row = [" ", "|", " ", "|", " "]
@@ -240,12 +269,9 @@ class Server:
                 for i in game_board:
                     for x in i:
                         game_string += x
-
-                print(game_string)
-
-                print("Enter your move: Upper Left, Upper Center, Upper Right")
-                print("Middle Left, Middle Center, Middle Right")
-                print("Lower Left, Lower Center, Lower Right")
+                        
+                move_message = "Enter your move: Upper Left, Upper Center, Upper Right\n" + "Middle Left, Middle Center, Middle Right\n" + "Lower Left, Lower Center, Lower Right\n"
+                mysend(from_sock, json.dumps({"action": "move_initiation", "message": move_message, "game_board": game_string}))
 
                     
 # ==============================================================================
