@@ -229,9 +229,12 @@ class ClientSM:
                     self.out_msg += "\n"
                     mysend(self.s, json.dumps({"action":"check_for_winner"}))
                 elif my_msg["action"] == "declaring_winner":
-                    self.out_msg += "The game is over. Returning to main menu..."
+                    self.out_msg += "The game is over. " + peer_msg["from"] + " won. Returning to main menu...\n"
                     self.state = S_LOGGEDIN
                     self.peer = ''
+                elif peer_msg["action"] == "declaring_a_tie":
+                    self.out_msg += "The game is over and ended in a tie. Returning to main menu...\n"
+                    self.state = S_LOGGEDIN
                 elif my_msg == 'bye':
                     self.disconnect()
                     self.state = S_LOGGEDIN
@@ -241,7 +244,10 @@ class ClientSM:
                 if peer_msg["action"] == "disconnect":
                     self.state = S_LOGGEDIN
                 elif peer_msg["action"] == "declaring_winner":
-                    self.out_msg += "The game is over. Returning to main menu..."
+                    self.out_msg += "The game is over. " + peer_msg["from"] + " won. Returning to main menu...\n"
+                    self.state = S_LOGGEDIN
+                elif peer_msg["action"] == "declaring_a_tie":
+                    self.out_msg += "The game is over and ended in a tie. Returning to main menu...\n"
                     self.state = S_LOGGEDIN
                 else:
                     self.out_msg += peer_msg["from"] + peer_msg["message"]

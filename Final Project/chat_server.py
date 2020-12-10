@@ -304,6 +304,7 @@ class Server:
                             col = (i % 3) * 2
                             mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the " + move_keys[i] + " spot.", "game_board": self.game_string}))
                             self.turn += 1
+                            print(self.turn)
                             if self.turn % 2 != 0:
                                 self.matrix[row][col] = "X"
                             elif self.turn % 2 == 0:
@@ -407,16 +408,21 @@ class Server:
                 every_combination["row_three"] = self.matrix[4][::2]
                 every_combination["diagonal_tlbr"] = [self.matrix[i][i] for i in range(0,len(self.matrix), 2)]
                 every_combination["diagonal_trbl"] = [self.matrix[i][-(i+1)] for i in range(0,len(self.matrix), 2)]
+                count = 0
 
-                
-                print(every_combination)
+                column_one = [row[0] for row in self.matrix[::2]]
+                column_two = [row[2] for row in self.matrix[::2]]
+                column_three = [row[4] for row in self.matrix[::2]]
+
+                board = column_one + column_two + column_three
 
                 for line in every_combination.values():
                     if line[0] == "X" and winning_line(line) == True:
-                        mysend(from_sock, json.dumps({"action": "declaring_winner", "from": players[0], "message": " has won!\n"}))
+                        mysend(from_sock, json.dumps({"action": "declaring_winner", "from": players[0]}))
                     elif line[0] == "O" and winning_line(line) == True:
-                        mysend(from_sock, json.dumps({"action": "declaring_winner", "from": players[1], "message": " has won!\n"}))
-                
+                        mysend(from_sock, json.dumps({"action": "declaring_winner", "from": players[1]}))
+                    elif self.turn == 9 and winning_line(line) == False:
+                        mysend(from_sock, json.dumps({"action": "declaring_a_tie"}))                
                     
 # ==============================================================================
 #                 the "from" guy really, really has had enough
