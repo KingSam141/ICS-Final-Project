@@ -135,6 +135,7 @@ class ClientSM:
                                + "4. Middle Left\n" + "5. Middle Center\n" +  "6. Middle Right\n" + "7. Lower Left\n" \
                                + "8. Lower Center\n" + "9. Lower Right\n"
                         self.out_msg += "Enter a number when it's your turn to make a move. The board will appear after you make a move.\n"
+                        self.out_msg += "Since you started the game, you are X.\n"
                         self.out_msg += "------------------------------------\n"
                         self.state = S_PLAYING
                     else:
@@ -172,6 +173,7 @@ class ClientSM:
                                + "4. Middle Left\n" + "5. Middle Center\n" +  "6. Middle Right\n" + "7. Lower Left\n" \
                                + "8. Lower Center\n" + "9. Lower Right\n"
                     self.out_msg += "Enter a number when it's your turn to make a move. The board will appear after you make a move.\n"
+                    self.out_msg += "Since you did not start the game, you are O.\n"
                     self.out_msg += "------------------------------------\n"
                     self.state = S_PLAYING
                     
@@ -225,6 +227,11 @@ class ClientSM:
                     self.out_msg += "\n"
                     self.out_msg += response["game_board"]
                     self.out_msg += "\n"
+                    mysend(self.s, json.dumps({"action":"check_for_winner"}))
+                elif my_msg["action"] == "declaring_winner":
+                    self.out_msg += "The game is over. Returning to main menu..."
+                    self.state = S_LOGGEDIN
+                    self.peer = ''
                 elif my_msg == 'bye':
                     self.disconnect()
                     self.state = S_LOGGEDIN
@@ -233,13 +240,18 @@ class ClientSM:
                 peer_msg = json.loads(peer_msg)
                 if peer_msg["action"] == "disconnect":
                     self.state = S_LOGGEDIN
+                elif peer_msg["action"] == "declaring_winner":
+                    self.out_msg += "The game is over. Returning to main menu..."
+                    self.state = S_LOGGEDIN
                 else:
                     self.out_msg += peer_msg["from"] + peer_msg["message"]
+                    self.out_msg += "\n"
                     mysend(self.s, json.dumps({"action":"screen_update"}))
                     response = json.loads(myrecv(self.s))
                     self.out_msg += "\n"
                     self.out_msg += response["game_board"]
                     self.out_msg += "\n"
+                    mysend(self.s, json.dumps({"action":"check_for_winner"}))
 
             # Display the menu again
             if self.state == S_LOGGEDIN:

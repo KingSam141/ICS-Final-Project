@@ -293,7 +293,6 @@ class Server:
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Upper Left spot.", "game_board": self.game_string}))
                         self.turn += 1
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.first_row[0] = "X"
                         elif self.turn % 2 == 0:
                             self.first_row[0] = "0"
@@ -301,7 +300,6 @@ class Server:
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Upper Center spot.", "game_board": self.game_string}))
                         self.turn += 1
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.first_row[2] = "X"
                         elif self.turn % 2 == 0:
                             self.first_row[2] = "0"
@@ -309,7 +307,6 @@ class Server:
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Upper Right spot.", "game_board": self.game_string}))
                         self.turn += 1
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.first_row[4] = "X"
                         elif self.turn % 2 == 0:
                             self.first_row[4] = "0"
@@ -317,7 +314,6 @@ class Server:
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Middle Left spot.", "game_board": self.game_string}))
                         self.turn += 1
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.third_row[0] = "X"
                         elif self.turn % 2 == 0:
                             self.third_row[0] = "0"
@@ -325,7 +321,6 @@ class Server:
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Middle Center spot.", "game_board": self.game_string}))
                         self.turn += 1
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.third_row[2] = "X"
                         elif self.turn % 2 == 0:
                             self.third_row[2] = "0"
@@ -333,7 +328,6 @@ class Server:
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Middle Right spot.", "game_board": self.game_string}))
                         self.turn += 1
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.third_row[4] = "X"
                         elif self.turn % 2 == 0:
                             self.third_row[4] = "0"
@@ -341,14 +335,12 @@ class Server:
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Lower Left spot.", "game_board": self.game_string}))
                         self.turn += 1
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.fifth_row[0] = "X"
                         elif self.turn % 2 == 0:
                             self.fifth_row[0] = "0"
                     if msg["selected_move"] == "8":
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Lower Center spot.", "game_board": self.game_string}))
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.fifth_row[2] = "X"
                         elif self.turn % 2 == 0:
                             self.fifth_row[2] = "0"
@@ -356,10 +348,45 @@ class Server:
                         mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Lower Right spot.", "game_board": self.game_string}))
                         self.turn += 1
                         if self.turn % 2 != 0:
-                            print(self.turn)
                             self.fifth_row[4] = "X"
                         elif self.turn % 2 == 0:
                             self.fifth_row[4] = "0"
+
+            elif msg["action"] == "check_for_winner":
+                """
+                first_row = [" ", "|", " ", "|", " "]
+                second_row = ["-", "-", "-", "-", "-"]
+                third_row = [" ", "|", " ", "|", " "]
+                fourth_row = ["-", "-", "-", "-", "-"]
+                fifth_row = [" ", "|", " ", "|", " "]
+                """
+                players = []
+                names = self.logged_name2sock
+                for name in names:
+                    players += [name]
+
+                def winning_line(line):
+                    return all(x == line[0] for x in line)
+
+                every_combination = {}
+                
+                every_combination["column_one"] = [self.first_row[0], self.third_row[0], self.fifth_row[0]]
+                every_combination["column_two"] = [self.first_row[2], self.third_row[2], self.fifth_row[2]]
+                every_combination["column_three"] = [self.first_row[4], self.third_row[4], self.fifth_row[4]]
+                every_combination["row_one"] = [self.first_row[0], self.first_row[2], self.first_row[4]]
+                every_combination["row_two"] = [self.third_row[0], self.third_row[2], self.third_row[4]]
+                every_combination["row_three"] = [self.fifth_row[0], self.fifth_row[2], self.fifth_row[4]]
+                every_combination["diagonal_tlbr"] = [self.first_row[0], self.third_row[2], self.fifth_row[4]]
+                every_combination["diagonal_trbl"] = [self.first_row[4], self.third_row[2], self.fifth_row[0]]
+                
+                print(every_combination)
+
+                for line in every_combination.values():
+                    if line[0] == "X" and winning_line(line) == True:
+                        mysend(from_sock, json.dumps({"action": "declaring_winner", "from": players[0], "message": " has won!\n"}))
+                    elif line[0] == "O" and winning_line(line) == True:
+                        mysend(from_sock, json.dumps({"action": "declaring_winner", "from": players[1], "message": " has won!\n"}))
+                
                     
 # ==============================================================================
 #                 the "from" guy really, really has had enough
