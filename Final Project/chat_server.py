@@ -36,13 +36,8 @@ class Server:
         self.indices = {}
         # sonnet
         self.sonnet = indexer.PIndex("AllSonnets.txt")
-        # the following seven variables are for the tic-tac-toe game
+        # the following three variables are for the tic-tac-toe game
         self.game_string = ""
-        # self.first_row = [" ", "|", " ", "|", " "]
-        # self.second_row = ["-", "-", "-", "-", "-"]
-        # self.third_row = [" ", "|", " ", "|", " "]
-        # self.fourth_row = ["-", "-", "-", "-", "-"]
-        # self.fifth_row = [" ", "|", " ", "|", " "]
         self.matrix = [[" ", "|", " ", "|", " "],
                        ["-", "-", "-", "-", "-"],
                        [" ", "|", " ", "|", " "],
@@ -251,11 +246,11 @@ class Server:
                 search_term = msg["target"]
                 from_name = self.logged_sock2name[from_sock]
                 print('Search for ' + from_name + ' for ' + search_term)
-                search_rslt = '\n'.join([x[-1] for x in self.indices[from_name].search(search_term)])
-                print('Server side search: ' + search_rslt)
+                result = '\n'.join([i[-1] for i in self.indices[from_name].search(search_term)])
+                print('Server side search: ' + result)
                 # ---- end of your code --- #
                 mysend(from_sock, json.dumps(
-                    {"action": "search", "results": search_rslt}))
+                    {"action": "search", "results": result}))
 
 # ==============================================================================
 #                 Tic-Tac-Toe Game
@@ -266,12 +261,10 @@ class Server:
                 names = self.logged_name2sock
                 for name in names:
                     players += [name]
-                print(players)
                 
                 mysend(from_sock, json.dumps({"action": "game", "time_to_start": "y"}))
 
             elif msg["action"] == "screen_update":
-                # game_board = [self.first_row, "\n", self.second_row, "\n", self.third_row, "\n", self.fourth_row, "\n", self.fifth_row, "\n"]
                 game_board = [row + ["\n"] for row in self.matrix]
                 self.game_string = ""
 
@@ -286,14 +279,6 @@ class Server:
                 mysend(from_sock, json.dumps({"action": "move_initiation", "message": move_message, "game_board": self.game_string}))
 
             elif msg["action"] == "move":
-                # for reference:
-                """
-                first_row = [" ", "|", " ", "|", " "]
-                second_row = ["-", "-", "-", "-", "-"]
-                third_row = [" ", "|", " ", "|", " "]
-                fourth_row = ["-", "-", "-", "-", "-"]
-                fifth_row = [" ", "|", " ", "|", " "]
-                """
                 move_keys = ["Upper Left", "Upper Center", "Upper Right","Middle Left", "Middle Center" , "Middle Right" , "Lower Left" \
                 , "Lower Center" , "Lower Right"]
 
@@ -309,78 +294,8 @@ class Server:
                                 self.matrix[row][col] = "X"
                             elif self.turn % 2 == 0:
                                 self.matrix[row][col] = "0"
-                    
-                    # if msg["selected_move"] == "1":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Upper Left spot.", "game_board": self.game_string}))
-                    #     self.turn += 1
-                    #     if self.turn % 2 != 0:
-                    #         self.first_row[0] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.first_row[0] = "0"
-                    # if msg["selected_move"] == "2":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Upper Center spot.", "game_board": self.game_string}))
-                    #     self.turn += 1
-                    #     if self.turn % 2 != 0:
-                    #         self.first_row[2] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.first_row[2] = "0"
-                    # if msg["selected_move"] == "3":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Upper Right spot.", "game_board": self.game_string}))
-                    #     self.turn += 1
-                    #     if self.turn % 2 != 0:
-                    #         self.first_row[4] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.first_row[4] = "0"
-                    # if msg["selected_move"] == "4":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Middle Left spot.", "game_board": self.game_string}))
-                    #     self.turn += 1
-                    #     if self.turn % 2 != 0:
-                    #         self.third_row[0] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.third_row[0] = "0"
-                    # if msg["selected_move"] == "5":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Middle Center spot.", "game_board": self.game_string}))
-                    #     self.turn += 1
-                    #     if self.turn % 2 != 0:
-                    #         self.third_row[2] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.third_row[2] = "0"
-                    # if msg["selected_move"] == "6":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Middle Right spot.", "game_board": self.game_string}))
-                    #     self.turn += 1
-                    #     if self.turn % 2 != 0:
-                    #         self.third_row[4] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.third_row[4] = "0"
-                    # if msg["selected_move"] == "7":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Lower Left spot.", "game_board": self.game_string}))
-                    #     self.turn += 1
-                    #     if self.turn % 2 != 0:
-                    #         self.fifth_row[0] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.fifth_row[0] = "0"
-                    # if msg["selected_move"] == "8":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Lower Center spot.", "game_board": self.game_string}))
-                    #     if self.turn % 2 != 0:
-                    #         self.fifth_row[2] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.fifth_row[2] = "0"
-                    # if msg["selected_move"] == "9":
-                    #     mysend(from_sock, json.dumps({"action": "making_a_move", "message": "You made a move in the Lower Right spot.", "game_board": self.game_string}))
-                    #     self.turn += 1
-                    #     if self.turn % 2 != 0:
-                    #         self.fifth_row[4] = "X"
-                    #     elif self.turn % 2 == 0:
-                    #         self.fifth_row[4] = "0"
 
             elif msg["action"] == "check_for_winner":
-                """
-                first_row = [" ", "|", " ", "|", " "]
-                second_row = ["-", "-", "-", "-", "-"]
-                third_row = [" ", "|", " ", "|", " "]
-                fourth_row = ["-", "-", "-", "-", "-"]
-                fifth_row = [" ", "|", " ", "|", " "]
-                """
                 players = []
                 names = self.logged_name2sock
                 for name in names:
@@ -391,15 +306,6 @@ class Server:
 
                 every_combination = {}
                 
-                # every_combination["column_one"] = [self.first_row[0], self.third_row[0], self.fifth_row[0]]
-                # every_combination["column_two"] = [self.first_row[2], self.third_row[2], self.fifth_row[2]]
-                # every_combination["column_three"] = [self.first_row[4], self.third_row[4], self.fifth_row[4]]
-                # every_combination["row_one"] = [self.first_row[0], self.first_row[2], self.first_row[4]]
-                # every_combination["row_two"] = [self.third_row[0], self.third_row[2], self.third_row[4]]
-                # every_combination["row_three"] = [self.fifth_row[0], self.fifth_row[2], self.fifth_row[4]]
-                # every_combination["diagonal_tlbr"] = [self.first_row[0], self.third_row[2], self.fifth_row[4]]
-                # every_combination["diagonal_trbl"] = [self.first_row[4], self.third_row[2], self.fifth_row[0]]
-
                 every_combination["column_one"] = [row[0] for row in self.matrix[::2]]
                 every_combination["column_two"] = [row[2] for row in self.matrix[::2]]
                 every_combination["column_three"] = [row[4] for row in self.matrix[::2]]
@@ -422,7 +328,8 @@ class Server:
                     elif line[0] == "O" and winning_line(line) == True:
                         mysend(from_sock, json.dumps({"action": "declaring_winner", "from": players[1]}))
                     elif self.turn == 9 and winning_line(line) == False:
-                        mysend(from_sock, json.dumps({"action": "declaring_a_tie"}))                
+                        mysend(from_sock, json.dumps({"action": "declaring_a_tie"}))
+                
                     
 # ==============================================================================
 #                 the "from" guy really, really has had enough
